@@ -56,6 +56,12 @@ logsRouter.post('/', async (c) => {
   const id = crypto.randomUUID();
   
   try {
+    // Ensure user exists
+    await db.prepare(`
+      INSERT INTO users (id) VALUES (?)
+      ON CONFLICT(id) DO NOTHING
+    `).bind(userId).run();
+    
     const result = await db.prepare(`
       INSERT INTO daily_logs (
         id, user_id, date, is_period, flow, moods, symptoms, discharge,
@@ -75,16 +81,16 @@ logsRouter.post('/', async (c) => {
         notes = excluded.notes,
         updated_at = CURRENT_TIMESTAMP
     `).bind(
-      id, userId, date, is_period ? 1 : 0, flow, 
-      JSON.stringify(moods || []), JSON.stringify(symptoms || []), discharge,
-      bbt, water_glasses, intimate ? 1 : 0, protected_intimate ? 1 : 0, 
-      pill_taken ? 1 : 0, notes
+      id, userId, date, is_period ? 1 : 0, flow || null, 
+      JSON.stringify(moods || []), JSON.stringify(symptoms || []), discharge || null,
+      bbt || null, water_glasses || 0, intimate ? 1 : 0, protected_intimate ? 1 : 0, 
+      pill_taken ? 1 : 0, notes || null
     ).run();
     
     return c.json({ success: true, id, result });
   } catch (error) {
     console.error('Error saving log:', error);
-    return c.json({ error: 'Failed to save log' }, 500);
+    return c.json({ error: 'Failed to save log', details: error.message }, 500);
   }
 });
 

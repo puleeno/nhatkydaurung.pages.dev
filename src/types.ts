@@ -61,6 +61,8 @@ export interface CycleSettings {
   lutealPhaseLength: number; // default 14
   reminderEnabled: boolean;
   reminderDaysBefore: number;
+  passcodeEnabled?: boolean;
+  passcode?: string | null;
 }
 
 export type CyclePhase = 'menstrual' | 'follicular' | 'ovulation' | 'luteal';

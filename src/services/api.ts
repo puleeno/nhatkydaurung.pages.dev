@@ -112,4 +112,14 @@ export const api = {
     if (!response.ok) throw new Error('Failed to save settings');
     return response.json();
   },
+
+  async verifyPasscode(passcode: string) {
+    const response = await fetch(`${API_BASE_URL}/api/settings/verify-passcode`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ passcode }),
+    });
+    if (!response.ok) throw new Error('Failed to verify passcode');
+    return response.json();
+  },
 };

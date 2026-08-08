@@ -48,10 +48,16 @@ cyclesRouter.post('/', async (c) => {
   const id = crypto.randomUUID();
   
   try {
+    // Ensure user exists
+    await db.prepare(`
+      INSERT INTO users (id) VALUES (?)
+      ON CONFLICT(id) DO NOTHING
+    `).bind(userId).run();
+    
     const result = await db.prepare(`
       INSERT INTO period_cycles (id, user_id, start_date, end_date, length_in_days, cycle_length)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).bind(id, userId, start_date, end_date, length_in_days, cycle_length).run();
+    `).bind(id, userId, start_date, end_date, length_in_days || null, cycle_length || null).run();
     
     return c.json({ success: true, id, result });
   } catch (error) {
@@ -78,7 +84,7 @@ cyclesRouter.put('/:id', async (c) => {
       UPDATE period_cycles
       SET end_date = ?, length_in_days = ?, cycle_length = ?, updated_at = CURRENT_TIMESTAMP
       WHERE user_id = ? AND id = ?
-    `).bind(end_date, length_in_days, cycle_length, userId, id).run();
+    `).bind(end_date, length_in_days || null, cycle_length || null, userId, id).run();
     
     if (result.meta.changes === 0) {
       return c.json({ error: 'Cycle not found' }, 404);

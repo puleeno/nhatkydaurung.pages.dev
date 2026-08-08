@@ -15,6 +15,7 @@ import { CycleHistory } from './components/CycleHistory';
 import { HealthTips } from './components/HealthTips';
 import { StatsView } from './components/StatsView';
 import { SettingsModal } from './components/SettingsModal';
+import { PasscodeScreen } from './components/PasscodeScreen';
 import { api } from './services/api';
 
 export default function App() {
@@ -31,6 +32,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'calendar' | 'history' | 'stats' | 'tips'>('calendar');
   const [selectedDateForLog, setSelectedDateForLog] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [showPasscodeScreen, setShowPasscodeScreen] = useState<boolean>(false);
 
   // Initialize data on mount
   useEffect(() => {
@@ -78,6 +81,8 @@ export default function App() {
           lutealPhaseLength: settingsData.luteal_phase_length,
           reminderEnabled: settingsData.reminder_enabled,
           reminderDaysBefore: settingsData.reminder_days_before,
+          passcodeEnabled: settingsData.passcode_enabled || false,
+          passcode: settingsData.passcode || null,
         };
 
         setLogs(logsRecord);
@@ -95,6 +100,37 @@ export default function App() {
 
     loadData();
   }, []);
+
+  // Check authentication when settings are loaded
+  useEffect(() => {
+    const authSession = localStorage.getItem('auth_session');
+    if (authSession) {
+      try {
+        const { expiry } = JSON.parse(authSession);
+        if (Date.now() < expiry) {
+          setIsAuthenticated(true);
+          setShowPasscodeScreen(false);
+          return;
+        }
+      } catch (e) {
+        localStorage.removeItem('auth_session');
+      }
+    }
+    
+    if (settings.passcodeEnabled) {
+      setShowPasscodeScreen(true);
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [settings.passcodeEnabled]);
+
+  const handleUnlock = () => {
+    // Set authentication session for 30 minutes
+    const expiry = Date.now() + 30 * 60 * 1000;
+    localStorage.setItem('auth_session', JSON.stringify({ expiry }));
+    setIsAuthenticated(true);
+    setShowPasscodeScreen(false);
+  };
 
   const todayStr = formatDateKey(new Date());
   const cycleSummary = getCurrentCycleSummary(cycles, logs, settings);
@@ -393,6 +429,11 @@ export default function App() {
     console.warn('Clear all data - API deletion not implemented');
   };
 
+  // Show passcode screen if authentication is required
+  if (showPasscodeScreen && !isAuthenticated) {
+    return <PasscodeScreen onUnlock={handleUnlock} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#FFF8F9] text-[#4A4A4A] font-sans antialiased pb-12">
       {/* Header Bar */}
@@ -476,7 +517,16 @@ export default function App() {
               luteal_phase_length: s.lutealPhaseLength,
               reminder_enabled: s.reminderEnabled,
               reminder_days_before: s.reminderDaysBefore,
+              passcode_enabled: s.passcodeEnabled,
+              passcode: s.passcode,
             });
+            
+            // If passcode was just enabled, clear auth session to force re-authentication
+            if (s.passcodeEnabled && !settings.passcodeEnabled) {
+              localStorage.removeItem('auth_session');
+              setIsAuthenticated(false);
+              setShowPasscodeScreen(true);
+            }
           } catch (error) {
             console.error('Failed to save settings to API:', error);
           }
