@@ -130,9 +130,17 @@ export function getDayStatus(
   const avgPeriod = getAveragePeriodLength(cycles, settings.averagePeriodLength);
   const luteal = settings.lutealPhaseLength || 14;
 
-  const isPeriodRecorded = (log?.isPeriod) || isDateInRecordedPeriod(dateStr, cycles);
+  // Check if date is marked as period in logs OR falls within recorded cycles
+  const isPeriodInLogs = log?.isPeriod === true;
+  const isPeriodInCycles = isDateInRecordedPeriod(dateStr, cycles);
+  const isPeriodRecorded = isPeriodInLogs || isPeriodInCycles;
 
-  const lastRecordedStart = sortedCycles.length > 0 ? sortedCycles[0].startDate : null;
+  // Get last period start date from logs first, then cycles
+  const lastPeriodStartFromLogs = Object.keys(logs)
+    .filter(date => logs[date].isPeriod === true)
+    .sort((a, b) => diffDays(b, a))[0] || null;
+  
+  const lastRecordedStart = lastPeriodStartFromLogs || (sortedCycles.length > 0 ? sortedCycles[0].startDate : null);
 
   let isPredictedPeriod = false;
   let isOvulationDay = false;
@@ -249,9 +257,16 @@ export function getCurrentCycleSummary(
   const avgPeriod = getAveragePeriodLength(cycles, settings.averagePeriodLength);
   const luteal = settings.lutealPhaseLength || 14;
 
+  // Get last period start date from logs first, then cycles
+  const lastPeriodStartFromLogs = Object.keys(logs)
+    .filter(date => logs[date].isPeriod === true)
+    .sort((a, b) => diffDays(b, a))[0] || null;
+  
+  const lastPeriodStart = lastPeriodStartFromLogs || (sortedCycles.length > 0 ? sortedCycles[0].startDate : null);
+
   const todayStatus = getDayStatus(todayStr, cycles, logs, settings);
 
-  if (sortedCycles.length === 0) {
+  if (!lastPeriodStart) {
     const ovulation = addDaysToDate(todayStr, avgCycle - luteal);
     return {
       currentDayInCycle: 1,
@@ -269,10 +284,9 @@ export function getCurrentCycleSummary(
     };
   }
 
-  const lastStart = sortedCycles[0].startDate;
-  const daysSinceStart = diffDays(todayStr, lastStart);
+  const daysSinceStart = diffDays(todayStr, lastPeriodStart);
 
-  let nextPeriodStart = addDaysToDate(lastStart, avgCycle);
+  let nextPeriodStart = addDaysToDate(lastPeriodStart, avgCycle);
   // If today is past nextPeriodStart, project forward
   while (nextPeriodStart < todayStr) {
     nextPeriodStart = addDaysToDate(nextPeriodStart, avgCycle);
@@ -295,7 +309,7 @@ export function getCurrentCycleSummary(
     currentPhase: todayStatus.phase,
     currentPhaseNameVi: todayStatus.phaseNameVi,
     pregnancyChanceToday: todayStatus.pregnancyChance,
-    lastPeriodStartDate: lastStart,
+    lastPeriodStartDate: lastPeriodStart,
   };
 }
 

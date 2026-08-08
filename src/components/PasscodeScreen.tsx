@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Lock, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -18,8 +18,7 @@ export const PasscodeScreen: React.FC<PasscodeScreenProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showPasscode, setShowPasscode] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async () => {
     setError('');
     setIsLoading(true);
 
@@ -37,16 +36,59 @@ export const PasscodeScreen: React.FC<PasscodeScreenProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [passcode, onUnlock]);
+
+  // Auto-submit when passcode reaches 6 digits
+  useEffect(() => {
+    if (passcode.length === 6 && !isLoading) {
+      handleSubmit();
+    }
+  }, [passcode, isLoading, handleSubmit]);
+
+  // Handle keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle number keys (0-9)
+      if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        setPasscode(prev => {
+          if (prev.length < 6) {
+            setError('');
+            return prev + e.key;
+          }
+          return prev;
+        });
+      }
+      // Handle backspace/delete
+      else if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault();
+        setPasscode(prev => {
+          setError('');
+          return prev.slice(0, -1);
+        });
+      }
+      // Handle escape to cancel
+      else if (e.key === 'Escape' && showCancel && onCancel) {
+        e.preventDefault();
+        onCancel();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showCancel, onCancel]);
 
   const handleDigitClick = (digit: string) => {
     if (passcode.length < 6) {
-      setPasscode(passcode + digit);
+      setPasscode(prev => prev + digit);
+      setError('');
     }
   };
 
   const handleDelete = () => {
-    setPasscode(passcode.slice(0, -1));
+    setPasscode(prev => prev.slice(0, -1));
     setError('');
   };
 
@@ -113,6 +155,11 @@ export const PasscodeScreen: React.FC<PasscodeScreenProps> = ({
           )}
         </button>
 
+        {/* Keyboard hints */}
+        <div className="text-center text-xs text-slate-400">
+          <p>Nhấn phím số (0-9) để nhập • Backspace để xóa • Tự động submit khi đủ 6 số</p>
+        </div>
+
         {/* Numpad */}
         <div className="grid grid-cols-3 gap-3">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
@@ -151,23 +198,6 @@ export const PasscodeScreen: React.FC<PasscodeScreenProps> = ({
             <span className="text-slate-500 text-lg">⌫</span>
           </button>
         </div>
-
-        {/* Submit Button */}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={passcode.length !== 6 || isLoading}
-          className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {isLoading ? (
-            <>
-              <RefreshCw className="w-5 h-5 animate-spin" />
-              <span>Đang xác thực...</span>
-            </>
-          ) : (
-            <span>Mở khóa</span>
-          )}
-        </button>
 
         {/* Cancel Button */}
         {showCancel && onCancel && (

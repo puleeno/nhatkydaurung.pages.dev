@@ -85,41 +85,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Legend Card */}
-      <div className="bg-[#FFF0F3] rounded-2xl p-3 sm:p-4 border border-[#FFE4E9] shadow-2xs">
-        <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-          <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-            <Info className="w-4 h-4 text-rose-500 shrink-0" />
-            Chú thích màu sắc Calendar
-          </span>
-          <span className="text-[10px] sm:text-[11px] text-slate-400 hidden xs:inline">Nhấp vào ngày để ghi nhật ký</span>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 text-[11px] sm:text-xs">
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-rose-500 text-white font-bold shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-white shrink-0" />
-            <span>Kinh nguyệt</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-dashed border-rose-300 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
-            <span>Dự đoán kinh</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-sky-200 text-sky-900 border border-amber-300 font-bold shadow-2xs">
-            <span>🥚 Rụng trứng</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200 font-semibold">
-            <span>🩵 Thụ thai cao</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white text-slate-600 border border-slate-200">
-            <span>⚪ Bình thường</span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Calendar Card */}
       <div className="bg-white rounded-2xl sm:rounded-[32px] p-2.5 sm:p-6 border border-[#FFE4E9] shadow-sm">
         {/* Calendar Header Controls */}

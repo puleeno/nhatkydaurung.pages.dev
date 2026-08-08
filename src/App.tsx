@@ -16,6 +16,7 @@ import { HealthTips } from './components/HealthTips';
 import { StatsView } from './components/StatsView';
 import { SettingsModal } from './components/SettingsModal';
 import { PasscodeScreen } from './components/PasscodeScreen';
+import { Predictions } from './components/Predictions';
 import { api } from './services/api';
 
 export default function App() {
@@ -44,6 +45,8 @@ export default function App() {
           api.getCycles(),
           api.getSettings()
         ]);
+
+        console.log('Loaded data:', { logsData, cyclesData, settingsData });
 
         // Convert logs array to record
         const logsRecord: Record<string, DailyLog> = {};
@@ -103,34 +106,34 @@ export default function App() {
 
   // Check authentication when settings are loaded
   useEffect(() => {
-    const authSession = localStorage.getItem('auth_session');
-    if (authSession) {
-      try {
-        const { expiry } = JSON.parse(authSession);
-        if (Date.now() < expiry) {
-          setIsAuthenticated(true);
-          setShowPasscodeScreen(false);
-          return;
-        }
-      } catch (e) {
-        localStorage.removeItem('auth_session');
-      }
-    }
-    
+    // Always require passcode if enabled, no persistent session
     if (settings.passcodeEnabled) {
       setShowPasscodeScreen(true);
+      setIsAuthenticated(false);
     } else {
+      setShowPasscodeScreen(false);
       setIsAuthenticated(true);
     }
   }, [settings.passcodeEnabled]);
 
   const handleUnlock = () => {
-    // Set authentication session for 30 minutes
-    const expiry = Date.now() + 30 * 60 * 1000;
-    localStorage.setItem('auth_session', JSON.stringify({ expiry }));
+    // Set authentication for current session only (no localStorage)
     setIsAuthenticated(true);
     setShowPasscodeScreen(false);
   };
+
+  // Clear authentication when tab is closed
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      setIsAuthenticated(false);
+      setShowPasscodeScreen(true);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const todayStr = formatDateKey(new Date());
   const cycleSummary = getCurrentCycleSummary(cycles, logs, settings);
@@ -216,7 +219,7 @@ export default function App() {
 
     // Sync to API
     try {
-      await api.saveLog({
+      const result = await api.saveLog({
         date: savedLog.date,
         is_period: savedLog.isPeriod,
         flow: savedLog.flow,
@@ -230,6 +233,7 @@ export default function App() {
         pill_taken: savedLog.pillTaken,
         notes: savedLog.notes,
       });
+      console.log('Log saved successfully:', result);
     } catch (error) {
       console.error('Failed to save log to API:', error);
     }
@@ -458,12 +462,22 @@ export default function App() {
 
         {/* Tab Content */}
         {activeTab === 'calendar' && (
-          <CalendarView
-            cycles={cycles}
-            logs={logs}
-            settings={settings}
-            onSelectDateToLog={(dateStr) => setSelectedDateForLog(dateStr)}
-          />
+          <>
+            {/* Predictions Card */}
+            <Predictions
+              cycles={cycles}
+              logs={logs}
+              settings={settings}
+            />
+
+            {/* Calendar View */}
+            <CalendarView
+              cycles={cycles}
+              logs={logs}
+              settings={settings}
+              onSelectDateToLog={(dateStr) => setSelectedDateForLog(dateStr)}
+            />
+          </>
         )}
 
         {activeTab === 'history' && (
@@ -521,9 +535,8 @@ export default function App() {
               passcode: s.passcode,
             });
             
-            // If passcode was just enabled, clear auth session to force re-authentication
+            // If passcode was just enabled, require authentication immediately
             if (s.passcodeEnabled && !settings.passcodeEnabled) {
-              localStorage.removeItem('auth_session');
               setIsAuthenticated(false);
               setShowPasscodeScreen(true);
             }
