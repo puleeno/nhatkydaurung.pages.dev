@@ -1,0 +1,6 @@
+{
+  "name": "Nhật Ký Kinh Nguyệt Cute",
+  "description": "Ứng dụng ghi nhật ký kinh nguyệt, dự đoán chu kỳ, ngày rụng trứng và khả năng thụ thai với lịch trực quan, dễ thương và chi tiết.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
