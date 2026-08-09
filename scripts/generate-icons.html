@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <button onclick="generateIcons()">Generate Icons</button>
+    <script>
+        function generateIcons() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Draw gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+            gradient.addColorStop(0, '#FFE4E9');
+            gradient.addColorStop(1, '#F43F5E');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Draw circles
+            ctx.fillStyle = '#F43F5E';
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            ctx.arc(256, 200, 60, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.globalAlpha = 0.2;
+            ctx.beginPath();
+            ctx.arc(200, 280, 40, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(312, 280, 40, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.globalAlpha = 0.25;
+            ctx.beginPath();
+            ctx.arc(256, 360, 80, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw flower emoji
+            ctx.globalAlpha = 1;
+            ctx.font = '80px Arial';
+            ctx.fillStyle = '#BE123C';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌸', 256, 280);
+            
+            // Generate PNG files
+            const sizes = [192, 512, 152, 167, 180, 32, 16];
+            sizes.forEach(size => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = size;
+                tempCanvas.height = size;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                tempCtx.drawImage(canvas, 0, 0, size, size);
+                
+                const link = document.createElement('a');
+                link.download = `icon-${size}.png`;
+                link.href = tempCanvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>

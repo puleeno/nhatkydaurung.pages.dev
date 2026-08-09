@@ -1,0 +1,55 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "daurung-api",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "daurung-db",
+      "database_id": "6231e616-063d-4620-af0e-dcefa3df38d2",
+      "migrations_dir": "./migrations"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "2204b6981b534dbc856fd4574e362aa2"
+    }
+  ],
+
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+
+  "env": {
+    "staging": {
+      "name": "daurung-api-staging",
+      "vars": {
+        "ENVIRONMENT": "staging"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "daurung-db",
+          "database_id": "6231e616-063d-4620-af0e-dcefa3df38d2",
+          "migrations_dir": "./migrations"
+        }
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "CACHE",
+          "id": "2204b6981b534dbc856fd4574e362aa2"
+        }
+      ]
+    }
+  }
+}
