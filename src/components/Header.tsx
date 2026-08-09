@@ -25,8 +25,8 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between w-full md:w-auto gap-3">
           {/* Brand logo & Title */}
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 bg-pink-400 rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl shadow-md shadow-pink-200 shrink-0">
-              🌙
+            <div className="w-9 h-9 sm:w-11 sm:h-11 bg-pink-400 rounded-2xl flex items-center justify-center shadow-md shadow-pink-200 shrink-0 overflow-hidden">
+              <img src="/icon-192.png" alt="Luna Bloom" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2">

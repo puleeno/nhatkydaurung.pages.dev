@@ -102,8 +102,8 @@ export const PasscodeScreen: React.FC<PasscodeScreenProps> = ({
       <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 mx-auto bg-rose-100 rounded-full flex items-center justify-center">
-            <Lock className="w-8 h-8 text-rose-500" />
+          <div className="w-16 h-16 mx-auto bg-rose-100 rounded-full flex items-center justify-center overflow-hidden">
+            <img src="/icon-192.png" alt="App Logo" className="w-full h-full object-cover" />
           </div>
           <h2 className="text-xl font-bold text-slate-800">
             Nhập mã passcode

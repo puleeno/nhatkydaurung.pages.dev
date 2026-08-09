@@ -132,8 +132,8 @@ export const LogModal: React.FC<LogModalProps> = ({
         {/* Modal Header */}
         <div className="bg-[#FFF0F3] p-4 sm:p-5 text-slate-800 border-b border-[#FFE4E9] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-pink-400 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-              🌙
+            <div className="w-10 h-10 rounded-2xl bg-pink-400 flex items-center justify-center font-bold text-lg shadow-sm overflow-hidden">
+              <img src="/icon-192.png" alt="App Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-extrabold text-slate-800">Ghi nhận nhật ký</h3>
